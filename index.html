@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dead Or Alive?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .auth-box {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 15px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 1rem;
+        }
+
+        input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        select option {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .user-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .user-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+        }
+
+        .user-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .user-card.sleeping {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .user-badge {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: #10b981;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .user-avatar {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .user-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .user-status {
+            font-size: 1rem;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .user-time {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-bottom: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .status-footer {
+            text-align: center;
+            opacity: 0.8;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.offline {
+            background: #ef4444;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+            .user-grid {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Dead Or Alive?</h1>
+            <p>Know who's conscious before you knock • Real-time Firebase sync</p>
+        </div>
+
+        <div class="auth-box" id="loginBox">
+            <h3 style="text-align: center; margin-bottom: 20px;">Login / Create Account</h3>
+            
+            <div id="loginForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Select User</label>
+                        <select id="userSelect">
+                            <option value="">Choose your name</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="passwordInput" placeholder="Enter password">
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <button class="btn" id="loginBtn">Login</button>
+                    <button class="btn btn-secondary" id="showCreateBtn">Create Account</button>
+                </div>
+            </div>
+
+            <div id="createForm" class="hidden">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Your Name</label>
+                        <select id="createUserSelect">
+                            <option value="">Choose your name</option>
+                            <option value="vaikunth">R. Vaikunth</option>
+                            <option value="shudharshan">Shudharshan.A</option>
+                            <option value="revanth">Revanth Puppala</option>
+                            <option value="sriram">Sriram Srikanth</option>
+                            <option value="santhosh">Santhosh Kiran</option>
+                            <option value="surya">Surya Sumeet Singh</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Create Password</label>
+                        <input type="password" id="createPasswordInput" placeholder="Min 6 characters">
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <button class="btn" id="createBtn">Create Account</button>
+                    <button class="btn btn-danger" id="backToLoginBtn">Back to Login</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="userInfo" class="auth-box hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <span>Logged in as: <strong id="currentUserName"></strong></span>
+                <button class="btn btn-danger" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+
+        <div class="loading" id="loadingIndicator">
+            Connecting to Firebase...
+        </div>
+
+        <div class="user-grid" id="userGrid"></div>
+
+        <div class="status-footer">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">Real-time sync active • Everyone sees live updates</span>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, get, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbvIvFjNwncCW9Co7aW56SvjhRYPGvQGQ",
+            authDomain: "dead-or-alive-app.firebaseapp.com",
+            databaseURL: "https://dead-or-alive-app-default-rtdb.firebaseio.com",
+            projectId: "dead-or-alive-app",
+            storageBucket: "dead-or-alive-app.firebasestorage.app",
+            messagingSenderId: "629949031603",
+            appId: "1:629949031603:web:4380361310c6dc8023bcc6",
+            measurementId: "G-PHSLWYX669"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        const BASE_USERS = {
+            'vaikunth': { name: 'R. Vaikunth', emoji: '🧑‍💼', hasAccount: false, password: null, isSleeping: false, lastUpdated: new Date().toISOString() },
+            'shudharshan': { name: 'Shudharshan.A', emoji: '👨‍🎓', hasAccount: false, password: null, isSleeping: false, lastUpdated: new Date().toISOString() },
+            'revanth': { name: 'Revanth Puppala', emoji: '👨‍💻', hasAccount: false, password: null, isSleeping: false, lastUpdated: new Date().toISOString() },
+            'sriram': { name: 'Sriram Srikanth', emoji: '👨‍🔬', hasAccount: false, password: null, isSleeping: false, lastUpdated: new Date().toISOString() },
+            'santhosh': { name: 'Santhosh Kiran', emoji: '👨‍🎯', hasAccount: false, password: null, isSleeping: false, lastUpdated: new Date().toISOString() },
+            'surya': { name: 'Surya Sumeet Singh', emoji: '🌟', hasAccount: false, password: null, isSleeping: false, lastUpdated: new Date().toISOString() }
+        };
+
+        let currentUser = null;
+        let usersData = JSON.parse(JSON.stringify(BASE_USERS));
+        let isOnline = false;
+
+        // Firebase functions
+        async function loadFromFirebase() {
+            try {
+                const usersRef = ref(database, 'users');
+                const snapshot = await get(usersRef);
+                
+                if (snapshot.exists()) {
+                    const firebaseData = snapshot.val();
+                    Object.keys(BASE_USERS).forEach(userId => {
+                        if (firebaseData[userId]) {
+                            usersData[userId] = { ...BASE_USERS[userId], ...firebaseData[userId] };
+                        }
+                    });
+                } else {
+                    await set(usersRef, usersData);
+                }
+                
+                updateConnectionStatus(true);
+                return true;
+            } catch (error) {
+                console.error('Firebase load error:', error);
+                updateConnectionStatus(false);
+                return false;
+            }
+        }
+
+        async function saveToFirebase() {
+            try {
+                const usersRef = ref(database, 'users');
+                await set(usersRef, usersData);
+                updateConnectionStatus(true);
+                return true;
+            } catch (error) {
+                console.error('Firebase save error:', error);
+                updateConnectionStatus(false);
+                return false;
+            }
+        }
+
+        function setupRealTimeListener() {
+            const usersRef = ref(database, 'users');
+            onValue(usersRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const firebaseData = snapshot.val();
+                    Object.keys(BASE_USERS).forEach(userId => {
+                        if (firebaseData[userId]) {
+                            usersData[userId] = { ...BASE_USERS[userId], ...firebaseData[userId] };
+                        }
+                    });
+                    updateDropdowns();
+                    renderUsers();
+                }
+            });
+        }
+
+        function updateConnectionStatus(online) {
+            isOnline = online;
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            
+            if (online) {
+                dot.classList.remove('offline');
+                text.textContent = 'Real-time sync active • Everyone sees live updates';
+            } else {
+                dot.classList.add('offline');
+                text.textContent = 'Connection lost • Trying to reconnect...';
+            }
+        }
+
+        async function loadData() {
+            document.getElementById('loadingIndicator').style.display = 'block';
+            await loadFromFirebase();
+            setupRealTimeListener();
+            document.getElementById('loadingIndicator').style.display = 'none';
+            updateDropdowns();
+            renderUsers();
+        }
+
+        function updateDropdowns() {
+            const loginSelect = document.getElementById('userSelect');
+            loginSelect.innerHTML = '<option value="">Choose your name</option>';
+            
+            Object.keys(BASE_USERS).forEach(userId => {
+                if (usersData[userId].hasAccount) {
+                    const option = document.createElement('option');
+                    option.value = userId;
+                    option.textContent = BASE_USERS[userId].name;
+                    loginSelect.appendChild(option);
+                }
+            });
+        }
+
+        async function toggleSleepStatus(userId) {
+            if (currentUser !== userId) {
+                alert('You can only change your own status!');
+                return;
+            }
+            
+            usersData[userId].isSleeping = !usersData[userId].isSleeping;
+            usersData[userId].lastUpdated = new Date().toISOString();
+            
+            const success = await saveToFirebase();
+            
+            if (!success) {
+                usersData[userId].isSleeping = !usersData[userId].isSleeping;
+                alert('Failed to update status. Please try again.');
+            }
+        }
+
+        function renderUsers() {
+            const grid = document.getElementById('userGrid');
+            grid.innerHTML = '';
+            
+            Object.keys(BASE_USERS).forEach(userId => {
+                const user = usersData[userId];
+                const isCurrentUser = userId === currentUser;
+                
+                const card = document.createElement('div');
+                card.className = `user-card ${user.isSleeping ? 'sleeping' : ''}`;
+                
+                const lastUpdated = new Date(user.lastUpdated);
+                const timeString = lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const dateString = lastUpdated.toLocaleDateString();
+                
+                card.innerHTML = `
+                    ${isCurrentUser ? '<div class="user-badge">YOU</div>' : ''}
+                    <div class="user-avatar">${user.emoji}</div>
+                    <div class="user-name">${user.name}</div>
+                    <div class="user-status">
+                        ${!user.hasAccount ? '🔐 No account' : 
+                          user.isSleeping ? '😴 Sleeping' : '✨ Available'}
+                    </div>
+                    <div class="user-time">
+                        ${user.hasAccount ? `${dateString} ${timeString}` : 'Create account to manage status'}
+                    </div>
+                    ${isCurrentUser && user.hasAccount ? `
+                        <button class="btn toggle-btn" data-userid="${userId}" style="width: 100%;">
+                            ${user.isSleeping ? '🌅 Mark as Awake' : '😴 Mark as Sleeping'}
+                        </button>
+                    ` : ''}
+                `;
+                
+                grid.appendChild(card);
+            });
+            
+            // Add event listeners to all toggle buttons
+            document.querySelectorAll('.toggle-btn').forEach(button => {
+                button.addEventListener('click', async function() {
+                    const userId = this.getAttribute('data-userid');
+                    this.disabled = true;
+                    this.textContent = 'Updating...';
+                    await toggleSleepStatus(userId);
+                    this.disabled = false;
+                    renderUsers(); // Re-render to update button text
+                });
+            });
+        }
+
+        // Event listeners
+        document.getElementById('showCreateBtn').addEventListener('click', function() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('createForm').classList.remove('hidden');
+        });
+
+        document.getElementById('backToLoginBtn').addEventListener('click', function() {
+            document.getElementById('createForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        });
+
+        document.getElementById('createBtn').addEventListener('click', async function() {
+            const username = document.getElementById('createUserSelect').value;
+            const password = document.getElementById('createPasswordInput').value;
+            
+            if (!username || !password) {
+                alert('Please fill all fields!');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('Password must be at least 6 characters!');
+                return;
+            }
+            
+            if (usersData[username].hasAccount) {
+                alert('Account already exists!');
+                return;
+            }
+            
+            this.disabled = true;
+            this.textContent = 'Creating...';
+            
+            usersData[username].hasAccount = true;
+            usersData[username].password = password;
+            usersData[username].lastUpdated = new Date().toISOString();
+            
+            const success = await saveToFirebase();
+            
+            this.disabled = false;
+            this.textContent = 'Create Account';
+            
+            if (success) {
+                alert('Account created! You can now login.');
+                document.getElementById('createForm').classList.add('hidden');
+                document.getElementById('loginForm').classList.remove('hidden');
+                updateDropdowns();
+                renderUsers();
+                
+                document.getElementById('createUserSelect').value = '';
+                document.getElementById('createPasswordInput').value = '';
+            } else {
+                alert('Failed to create account. Please try again.');
+                usersData[username].hasAccount = false;
+                usersData[username].password = null;
+            }
+        });
+
+        document.getElementById('loginBtn').addEventListener('click', async function() {
+            const username = document.getElementById('userSelect').value;
+            const password = document.getElementById('passwordInput').value;
+            
+            if (!username || !password) {
+                alert('Please enter username and password!');
+                return;
+            }
+            
+            this.disabled = true;
+            this.textContent = 'Logging in...';
+            
+            await loadFromFirebase();
+            
+            if (usersData[username] && usersData[username].password === password) {
+                currentUser = username;
+                document.getElementById('loginBox').classList.add('hidden');
+                document.getElementById('userInfo').classList.remove('hidden');
+                document.getElementById('currentUserName').textContent = usersData[username].name;
+                renderUsers();
+            } else {
+                alert('Invalid login!');
+            }
+            
+            this.disabled = false;
+            this.textContent = 'Login';
+            document.getElementById('passwordInput').value = '';
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            currentUser = null;
+            document.getElementById('loginBox').classList.remove('hidden');
+            document.getElementById('userInfo').classList.add('hidden');
+            renderUsers();
+        });
+
+        // Initialize
+        loadData();
+    </script>
+</body>
+</html>
